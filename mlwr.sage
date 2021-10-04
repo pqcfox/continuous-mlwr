@@ -6,11 +6,11 @@ eta = q // (2 * p)
 gamma1 = q // 16
 
 
-def pm_mod(a, q):
-    result = a % q
-    if result > q // 2:
-        result -= q
-    return result
+# def pm_mod(a, q):
+#     result = QQ(a) % q
+#     if result > q // 2:
+#         result -= q
+#     return result
 
 
 def random_mat(ring, ring_mod, ring_deg, nrows, ncols):
@@ -27,14 +27,18 @@ def uniform_vec(ring, val_range, size):
 
 
 def round_vec(ring, ring_mod, prev_mod, vec):
-    return vector([ring([round(ring_mod/prev_mod *
-                               pm_mod(float(coeff), prev_mod))
+    return vector([ring([round(ring_mod/prev_mod * QQ(coeff))
                          for coeff in poly])
                    for poly in vec])
 
 
+def simple_round_vec(ring, vec):
+    return vector([ring([round(coeff) for coeff in poly])
+                   for poly in vec])
+
+
 def coerce_val(ring, prev_mod, poly):
-    return ring([pm_mod(float(coeff), prev_mod) for coeff in poly])
+    return ring([coeff for coeff in poly])
 
 
 def coerce_vec(ring, prev_mod, vec):
@@ -52,7 +56,7 @@ def gen_chal(ring, ring_deg, num_hot):
 P.<X> = ZZ[]
 Pq.<X> = Integers(q)[]
 Pp.<X> = Integers(p)[]
-P_cont.<X> = RR[]
+P_cont.<X> = QQ[]
 R.<x> = QuotientRing(P, X^n + 1)
 Rq.<x> = QuotientRing(Pq, X^n + 1)
 Rp.<x> = QuotientRing(Pp, X^n + 1)
@@ -69,12 +73,12 @@ c = gen_chal(R, n, h)
 s2 = coerce_vec(R_cont, p, t) - p/q * coerce_vec(R_cont, q, A * s1)
 z = y + coerce_val(Rq, q, c) * s1
 xi1 = round_vec(R_cont, p, q, A * y) - p/q * coerce_vec(R_cont, q, A * y)
-xi2 = (round_vec(R_cont, p, p, coerce_val(R_cont, p, c) * s2) -
+xi2 = (simple_round_vec(R_cont, coerce_val(R_cont, p, c) * s2) -
        coerce_val(R_cont, p, c) * s2)
-nu = round_vec(R, p, p, xi1 - xi2)
+nu = simple_round_vec(R, xi1 - xi2)
 
 lhs = round_vec(Rp, p, q, A * z) - coerce_val(Rp, p, c) * t
-rhs = (w - round_vec(Rp, p, p, coerce_val(R_cont, p, c) * s2) -
+rhs = (w - simple_round_vec(Rp, coerce_val(R_cont, p, c) * s2) -
        coerce_vec(Rp, p, nu))
 
 
@@ -87,7 +91,7 @@ err_cpqAs1 = err_pq(A * coerce_val(Rq, q, c) * s1)
 
 lhs1 = (round_vec(Rp, p, q, A * y) +
         round_vec(Rp, p, q, A * coerce_val(Rq, q, c) * s1) -
-        round_vec(Rp, p, p, err_pqAy + err_cpqAs1) -
+        simple_round_vec(Rp, err_pqAy + err_cpqAs1) -
         coerce_val(Rp, p, c) * t)
 
 print(lhs - lhs1)
@@ -96,7 +100,7 @@ print(lhs - lhs1)
 should_be_zero = (round_vec(Rp, p, q, A * z) -
                   (round_vec(Rp, p, q, A * y) +
                    round_vec(Rp, p, q, A * coerce_val(Rq, q, c) * s1) +
-                   round_vec(Rp, p, p, -err_pqAy - err_cpqAs1)))
+                   simple_round_vec(Rp, -err_pqAy - err_cpqAs1)))
 
 
 print(list(p/q * coerce_vec(R_cont, q, (A * z))[0])[0])
@@ -107,6 +111,6 @@ print(list(p/q * coerce_vec(
 print(list(round_vec(Rp, p, q, A * z)[0])[0])
 print(list(round_vec(Rp, p, q, A * y)[0])[0])
 print(list(round_vec(Rp, p, q, A * coerce_val(Rq, q, c) * s1)[0])[0])
-print(list(round_vec(Rp, p, p, -err_pqAy - err_cpqAs1)[0])[0])
+print(list(simple_round_vec(Rp, -err_pqAy - err_cpqAs1)[0])[0])
 
 print(list(should_be_zero[0]))
