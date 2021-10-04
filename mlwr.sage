@@ -28,13 +28,13 @@ def uniform_vec(ring, val_range, size):
 
 def round_vec(ring, ring_mod, prev_mod, vec):
     return vector([ring([round(ring_mod/prev_mod *
-                               pm_mod(int(coeff), prev_mod))
+                               pm_mod(float(coeff), prev_mod))
                          for coeff in poly])
                    for poly in vec])
 
 
 def coerce_val(ring, prev_mod, poly):
-    return ring([pm_mod(int(coeff), prev_mod) for coeff in poly])
+    return ring([pm_mod(float(coeff), prev_mod) for coeff in poly])
 
 
 def coerce_vec(ring, prev_mod, vec):
@@ -77,4 +77,36 @@ lhs = round_vec(Rp, p, q, A * z) - coerce_val(Rp, p, c) * t
 rhs = (w - round_vec(Rp, p, p, coerce_val(R_cont, p, c) * s2) -
        coerce_vec(Rp, p, nu))
 
-print(lhs - rhs)  # should be zero
+
+# helper function for debugging
+def err_pq(vec):
+    return round_vec(R_cont, p, q, vec) - p/q * coerce_vec(R_cont, q, vec)
+
+err_pqAy = err_pq(A * y)
+err_cpqAs1 = err_pq(A * coerce_val(Rq, q, c) * s1)
+
+lhs1 = (round_vec(Rp, p, q, A * y) +
+        round_vec(Rp, p, q, A * coerce_val(Rq, q, c) * s1) -
+        round_vec(Rp, p, p, err_pqAy + err_cpqAs1) -
+        coerce_val(Rp, p, c) * t)
+
+print(lhs - lhs1)
+
+# okay... make it simpler
+should_be_zero = (round_vec(Rp, p, q, A * z) -
+                  (round_vec(Rp, p, q, A * y) +
+                   round_vec(Rp, p, q, A * coerce_val(Rq, q, c) * s1) +
+                   round_vec(Rp, p, p, -err_pqAy - err_cpqAs1)))
+
+
+print(list(p/q * coerce_vec(R_cont, q, (A * z))[0])[0])
+print(list(p/q * coerce_vec(R_cont, q, (A * y))[0])[0])
+print(list(p/q * coerce_vec(
+    R_cont, q, (A * coerce_val(Rq, q, c) * s1))[0])[0])
+
+print(list(round_vec(Rp, p, q, A * z)[0])[0])
+print(list(round_vec(Rp, p, q, A * y)[0])[0])
+print(list(round_vec(Rp, p, q, A * coerce_val(Rq, q, c) * s1)[0])[0])
+print(list(round_vec(Rp, p, p, -err_pqAy - err_cpqAs1)[0])[0])
+
+print(list(should_be_zero[0]))
