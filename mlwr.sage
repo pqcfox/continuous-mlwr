@@ -74,11 +74,15 @@ z = y + coerce_val(Rq, q, c) * s1
 xi1 = round_vec(R_cont, p, q, A * y) - p/q * coerce_vec(R_cont, q, A * y)
 xi2 = (simple_round_vec(R_cont, coerce_val(R_cont, p, c) * s2) -
        coerce_val(R_cont, p, c) * s2)
-nu = simple_round_vec(R, xi1 - xi2)
+# nu = simple_round_vec(R, xi1 - xi2)
+nu = simple_round_vec(R, -xi1 + xi2)
 
 lhs = round_vec(Rp, p, q, A * z) - coerce_val(Rp, p, c) * t
-rhs = (w - simple_round_vec(Rp, coerce_val(R_cont, p, c) * s2) -
+# rhs = (w - simple_round_vec(Rp, coerce_val(R_cont, p, c) * s2) -
+#        coerce_vec(Rp, p, nu))
+rhs = (w + simple_round_vec(Rp, -coerce_val(R_cont, p, c) * s2) +
        coerce_vec(Rp, p, nu))
+
 
 
 # helper function for debugging
@@ -88,12 +92,20 @@ def err_pq(vec):
 err_pqAy = err_pq(A * y)
 err_cpqAs1 = err_pq(A * coerce_val(Rq, q, c) * s1)
 
-lhs1 = (round_vec(Rp, p, q, A * y) +
+lhs1 = (w +
         round_vec(Rp, p, q, A * coerce_val(Rq, q, c) * s1) +
         simple_round_vec(Rp, -err_pqAy - err_cpqAs1) -
         coerce_val(Rp, p, c) * t)
 
-print(lhs - lhs1)
+lhs2 = (w +
+        simple_round_vec(Rp, -coerce_val(R_cont, p, c) * s2) +
+        simple_round_vec(Rp, -err_pqAy - err_cpqAs1))
+
+lhs3 = (w +
+        simple_round_vec(Rp, -coerce_val(R_cont, p, c) * s2) +
+        simple_round_vec(Rp, -xi1 - err_cpqAs1))
+
+print(lhs - lhs3)
 
 '''
 # okay... make it simpler
