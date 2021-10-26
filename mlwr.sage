@@ -12,7 +12,6 @@ gamma1 = q // 16
 #         result -= q
 #     return result
 
-
 def random_mat(ring, ring_mod, ring_deg, nrows, ncols):
     return matrix([[ring([randrange(0, ring_mod)
                           for _ in range(ring_deg)])
@@ -27,13 +26,13 @@ def uniform_vec(ring, val_range, size):
 
 
 def round_vec(ring, ring_mod, prev_mod, vec):
-    return vector([ring([round(ring_mod/prev_mod * QQ(coeff))
+    return vector([ring([(ring_mod/prev_mod * QQ(coeff)).round('up')
                          for coeff in poly])
                    for poly in vec])
 
 
 def simple_round_vec(ring, vec):
-    return vector([ring([round(coeff) for coeff in poly])
+    return vector([ring([coeff.round('up') for coeff in poly])
                    for poly in vec])
 
 
@@ -108,9 +107,15 @@ print(list(p/q * coerce_vec(R_cont, q, (A * y))[0])[0])
 print(list(p/q * coerce_vec(
     R_cont, q, (A * coerce_val(Rq, q, c) * s1))[0])[0])
 
+print('--')
 print(list(round_vec(Rp, p, q, A * z)[0])[0])
 print(list(round_vec(Rp, p, q, A * y)[0])[0])
 print(list(round_vec(Rp, p, q, A * coerce_val(Rq, q, c) * s1)[0])[0])
 print(list(simple_round_vec(Rp, -err_pqAy - err_cpqAs1)[0])[0])
 
+print('--')
+print(list((-err_pqAy - err_cpqAs1)[0])[0])
+print((list((-err_pqAy - err_cpqAs1)[0])[0]).round('up'))
+
+print('--')
 print(list(should_be_zero[0]))
