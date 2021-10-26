@@ -89,12 +89,13 @@ err_pqAy = err_pq(A * y)
 err_cpqAs1 = err_pq(A * coerce_val(Rq, q, c) * s1)
 
 lhs1 = (round_vec(Rp, p, q, A * y) +
-        round_vec(Rp, p, q, A * coerce_val(Rq, q, c) * s1) -
-        simple_round_vec(Rp, err_pqAy + err_cpqAs1) -
+        round_vec(Rp, p, q, A * coerce_val(Rq, q, c) * s1) +
+        simple_round_vec(Rp, -err_pqAy - err_cpqAs1) -
         coerce_val(Rp, p, c) * t)
 
 print(lhs - lhs1)
 
+'''
 # okay... make it simpler
 should_be_zero = (round_vec(Rp, p, q, A * z) -
                   (round_vec(Rp, p, q, A * y) +
@@ -119,3 +120,4 @@ print((list((-err_pqAy - err_cpqAs1)[0])[0]).round('up'))
 
 print('--')
 print(list(should_be_zero[0]))
+'''
